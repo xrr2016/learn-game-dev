@@ -4,6 +4,13 @@ import { Button } from 'antd'
 import './App.css'
 
 class App extends Component {
+  constructor (props) {
+    super(props)
+    this.clickHandler = this.clickHandler.bind(this)
+  }
+  clickHandler () {
+    window.alert('Clicked!')
+  }
   render () {
     return (
       <div className='App'>
@@ -13,7 +20,18 @@ class App extends Component {
         </div>
         <p className='App-intro'>
           To get started, edit <code>src/App.js</code> and save to reload.
-          <Button type='primary'>Primary</Button>
+          <br />
+          <br />
+          <Button type='primary' size='small'>Primary</Button>
+          <Button type='primary' size='large'>Primary</Button>
+          <br />
+          <br />
+          <Button type='danger' onClick={this.clickHandler}>Danger</Button>
+          <Button type='danger' shape='circle'>Danger</Button>
+          <br />
+          <br />
+          <Button type='dashed'>Dashed</Button>
+          <Button type='dashed' ghost>Dashed</Button>
         </p>
       </div>
     )
