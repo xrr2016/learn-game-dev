@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import logo from './logo.svg'
-import { Button } from 'antd'
+import { Button, Icon } from 'antd'
 import './App.css'
 
 class App extends Component {
@@ -32,6 +32,9 @@ class App extends Component {
           <br />
           <Button type='dashed'>Dashed</Button>
           <Button type='dashed' ghost>Dashed</Button>
+          <hr />
+          <Icon type='caret-left' />
+          <Icon type='check' />
         </p>
       </div>
     )
