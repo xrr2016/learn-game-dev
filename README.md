@@ -1,5 +1,5 @@
 # 学习 HTML5 游戏开发
 
-Breakout Pure JS
+![Breakout-phaser](./demos/breakout-phaser.gif)
 
-![Breakout-js](./demos/breakout-js.png)
+[Play]('./breakout-phaser/index.html')
