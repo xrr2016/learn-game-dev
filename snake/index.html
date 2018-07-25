@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>贪吃蛇</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      flex-flow: column wrap;
+      justify-content: flex-start;
+      align-items: center;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Snake</h1>
+  <canvas id="game" width="720" height="480"></canvas>
+  <script>
+    const CANVAS_BORDER_COLOR = 'black'
+    const CANVAS_BACKGROUND_COLOR = 'white'
+
+    const canvas = document.querySelector('#game')
+    const context = canvas.getContext('2d')
+
+    const gameWidth = canvas.width
+    const gameHeight = canvas.height
+    const LEFT_KEY = 37
+    const RIGHT_KEY = 39
+    const UP_KEY = 38
+    const DOWN_KEY = 40
+
+    const snake = [
+      { x: 300, y: 230 },
+      { x: 290, y: 230 },
+      { x: 280, y: 230 },
+      { x: 270, y: 230 }
+    ]
+    const food = {
+      x: 100,
+      y: 100
+    }
+    let dx = 10
+    let dy = 0
+
+
+    function clearCanvas() {
+      context.strokeStyle = CANVAS_BORDER_COLOR
+      context.fillStyle = CANVAS_BACKGROUND_COLOR
+      context.fillRect(0, 0, gameWidth, gameHeight)
+      context.strokeRect(0, 0, gameWidth, gameHeight)
+    }
+
+    function drawSnakePart(snakePart) {
+      context.fillStyle = "lightgreen"
+      context.strikeStyle = "darkgreen"
+      context.fillRect(snakePart.x, snakePart.y, 10, 10)
+      context.strokeRect(snakePart.x, snakePart.y, 10, 10)
+    }
+
+    function drawFood() {
+      context.fillStyle = "blue"
+      context.strikeStyle = "darkblue"
+      context.fillRect(food.x, food.y, 10, 10)
+      context.strokeRect(food.x, food.y, 10, 10)
+    }
+
+    function drawSnake() {
+      snake.forEach(drawSnakePart)
+    }
+
+    function advanceSnake() {
+      const oldHead = snake[0]
+      const newHead = { x: oldHead.x + dx, y: oldHead.y + dy }
+      snake.unshift(newHead)
+      snake.pop()
+    }
+
+    function changeDirection(event) {
+      const { keyCode } = event
+      const goingUp = dy === -10
+      const goingDown = dy === 10
+      const goingLeft = dx === 10
+      const goingRight = dx === -10
+
+      if (keyCode === LEFT_KEY && !goingRight) {
+        dx = -10
+        dy = 0
+      }
+
+      if (keyCode === UP_KEY && !goingDown) {
+        dx = 0
+        dy = -10
+      }
+
+      if (keyCode === RIGHT_KEY && !goingLeft) {
+        dx = 10
+        dy = 0
+      }
+
+      if (keyCode === DOWN_KEY && !goingDown) {
+        dx = 0
+        dy = 10
+      }
+
+    }
+
+    function randomTen(min, max) {
+      return Math.round(Math.random() * (max - min) + min / 10) * 10
+    }
+
+    function createFood() {
+
+    }
+
+    function drawFrame() {
+      requestAnimationFrame(drawFrame)
+      clearCanvas()
+      drawSnake()
+      drawFood()
+      advanceSnake()
+    }
+
+    drawFrame()
+    window.addEventListener('keydown', changeDirection)
+
+  </script>
+</body>
+
+</html>
