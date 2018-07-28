@@ -19,11 +19,13 @@
 
 <body>
   <h1>Snake</h1>
+  <h2 id="score">0</h2>
   <canvas id="game" width="720" height="480"></canvas>
   <script>
     const CANVAS_BORDER_COLOR = 'black'
     const CANVAS_BACKGROUND_COLOR = 'white'
 
+    const scoreText = document.querySelector('#score')
     const canvas = document.querySelector('#game')
     const context = canvas.getContext('2d')
 
@@ -46,6 +48,7 @@
     }
     let dx = 10
     let dy = 0
+    let score = 0
 
 
     function clearCanvas() {
@@ -77,7 +80,14 @@
       const oldHead = snake[0]
       const newHead = { x: oldHead.x + dx, y: oldHead.y + dy }
       snake.unshift(newHead)
-      snake.pop()
+      const isSnakeEatFood = snake[0].x === food.x && snake[0].y === food.x
+      if (isSnakeEatFood) {
+        score += 10
+        scoreText.textContent = score
+        createFood()
+      } else {
+        snake.pop()
+      }
     }
 
     function changeDirection(event) {
@@ -109,23 +119,48 @@
 
     }
 
+    function isFoodOnSnake(part) {
+      const isFoodOnSnake = part.x === food.x && part.y === food.y
+      if (isFoodOnSnake) {
+        createFood()
+      }
+    }
+
     function randomTen(min, max) {
-      return Math.round(Math.random() * (max - min) + min / 10) * 10
+      return Math.round((Math.random() * (max - min) + min) / 10) * 10
     }
 
     function createFood() {
+      food.x = randomTen(0, gameWidth - 10)
+      food.y = randomTen(0, gameHeight - 10)
+      snake.forEach(isFoodOnSnake)
+    }
+
+    function isGameEnd() {
+      for (let index = 4; index < snake.length; index++) {
+        const isCollide = snake[index].x === snake[0].x && snake[index].y === snake[0].y
+        if (isCollide) { return true }
+      }
+
+      const isHitLeftWall = snake[0].x < 0
+      const isHitRightWall = snake[0].x >= gameWidth - 10
+      const isHitTopWall = snake[0].y < 0
+      const isHitBottomWall = snake[0].y >= gameHeight - 10
+
+      return isHitLeftWall || isHitRightWall || isHitTopWall || isHitBottomWall
 
     }
 
     function drawFrame() {
-      requestAnimationFrame(drawFrame)
+      if (isGameEnd()) { return }
       clearCanvas()
-      drawSnake()
       drawFood()
+      drawSnake()
       advanceSnake()
     }
 
-    drawFrame()
+    const interval = setInterval(drawFrame, 100)
+
     window.addEventListener('keydown', changeDirection)
 
   </script>
