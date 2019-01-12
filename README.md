@@ -2,4 +2,6 @@
 
 ![Breakout-phaser](./demos/breakout-phaser.gif)
 
-[Play]('./breakout-phaser/index.html')
+[Breakout](/breakout-phaser/index.html)
+
+[Block](/block/index.html)

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Block Game</title>
+    <style>
+      body {
+        margin: 0;
+        background: #333;
+        display: grid;
+        justify-content: center;
+        align-items: flex-start;
+      }
+
+      canvas {
+        margin-top: 40px;
+        border: 1px solid #e2e2e2;
+      }
+    </style>
+  </head>
+  <body>
+    <button onmousedown="accelerate(-0.2)" onmouseup="accelerate(0.1)">
+      ACCELERATE
+    </button>
+    <script>
+      let myGamePiece
+      let myBackground
+      let myScore
+      let mySound
+      var myMusic
+      const myObstacles = []
+
+      function sound(src) {
+        this.sound = document.createElement('audio')
+        this.sound.src = src
+        this.sound.setAttribute('preload', 'auto')
+        this.sound.setAttribute('controls', 'none')
+        this.sound.style.display = 'none'
+        document.body.appendChild(this.sound)
+        this.play = function() {
+          return this.sound.play()
+        }
+        this.stop = function() {
+          return this.sound.pause()
+        }
+      }
+
+      function component(width, height, color, x, y, type) {
+        this.type = type
+        if (type == 'image' || type == 'background') {
+          this.image = new Image()
+          this.image.src = color
+        }
+        this.width = width
+        this.height = height
+        this.x = x
+        this.y = y
+        this.speedX = 0
+        this.speedY = 0
+        this.gravity = 0.05
+        this.gravitySpeed = 0
+        this.bounce = 0.6
+        this.speed = 1
+        this.update = function() {
+          ctx = myGameArea.context
+          if (this.type === 'text') {
+            ctx.font = this.width + ' ' + this.height
+            ctx.fillStyle = color
+            ctx.fillText(this.text, this.x, this.y)
+          } else if (type === 'image' || type === 'background') {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
+            if (type == 'background') {
+              ctx.drawImage(
+                this.image,
+                this.x + this.width,
+                this.y,
+                this.width,
+                this.height
+              )
+            }
+          } else {
+            ctx.fillStyle = color
+            ctx.fillRect(this.x, this.y, this.width, this.height)
+          }
+        }
+        this.newPos = function() {
+          // this.x += this.speed * Math.sin(this.angle)
+          // this.y -= this.speed * Math.cos(this.angle)
+          this.gravitySpeed += this.gravity
+          this.x += this.speedX
+          // this.y += this.speedY
+          this.y += this.speedY + this.gravitySpeed
+          this.hitBottom()
+          if (this.type === 'background') {
+            if (this.x === -this.width) {
+              this.x = 0
+            }
+          }
+        }
+        this.hitBottom = function() {
+          var rockbottom = myGameArea.canvas.height - this.height
+          if (this.y > rockbottom) {
+            this.y = rockbottom
+            this.gravitySpeed = -(this.gravitySpeed * this.bounce)
+          }
+        }
+        this.crashWith = function(otherobj) {
+          var myleft = this.x
+          var myright = this.x + this.width
+          var mytop = this.y
+          var mybottom = this.y + this.height
+          var otherleft = otherobj.x
+          var otherright = otherobj.x + otherobj.width
+          var othertop = otherobj.y
+          var otherbottom = otherobj.y + otherobj.height
+          var crash = true
+          if (
+            mybottom < othertop ||
+            mytop > otherbottom ||
+            myright < otherleft ||
+            myleft > otherright
+          ) {
+            crash = false
+          }
+          return crash
+        }
+      }
+
+      const myGameArea = {
+        canvas: document.createElement('canvas'),
+        start() {
+          this.canvas.width = 480
+          this.canvas.height = 270
+          this.context = this.canvas.getContext('2d')
+          document.body.insertBefore(this.canvas, document.body.childNodes[0])
+          this.frameNo = 0
+          this.interval = setInterval(updateGameArea, 20)
+          window.addEventListener('keydown', function(e) {
+            myGamePiece.image.src = 'angry.gif'
+            myGameArea.keys = myGameArea.keys || []
+            myGameArea.keys[e.keyCode] = true
+          })
+          window.addEventListener('keyup', function(e) {
+            myGamePiece.image.src = 'smiley.gif'
+            // myGameArea.keys[e.keyCode] = false
+          })
+        },
+        clear() {
+          this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+        },
+        stop() {
+          // myMusic.stop()
+          clearInterval(this.interval)
+        }
+      }
+
+      function everyinterval(n) {
+        if ((myGameArea.frameNo / n) % 1 === 0) {
+          return true
+        }
+        return false
+      }
+
+      function accelerate(n) {
+        myGamePiece.gravity = n
+      }
+
+      function startGame() {
+        mySound = new sound('bounce.mp3')
+        // myMusic = new sound('gametheme.mp3')
+        // myMusic.play()
+        // myBackground = new component(656, 270, 'sea.jpg', 0, 0, 'image')
+        myGamePiece = new component(30, 30, 'smiley.gif', 10, 120, 'image')
+        myObstacle = new component(10, 200, 'green', 300, 120)
+        myScore = new component('18px', 'Consolas', '#fff', 360, 30, 'text')
+        myGameArea.start()
+      }
+
+      function updateGameArea() {
+        var x, y
+        for (i = 0; i < myObstacles.length; i += 1) {
+          if (myGamePiece.crashWith(myObstacles[i])) {
+            // mySound
+            //   .play()
+            //   .then()
+            //   .catch()
+            myGameArea.stop()
+            return
+          }
+        }
+
+        myGameArea.clear()
+        myGameArea.frameNo += 1
+        if (myGameArea.frameNo == 1 || everyinterval(150)) {
+          x = myGameArea.canvas.width
+          minHeight = 20
+          maxHeight = 200
+          height = Math.floor(
+            Math.random() * (maxHeight - minHeight + 1) + minHeight
+          )
+          minGap = 50
+          maxGap = 200
+          gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap)
+          myObstacles.push(new component(10, height, 'green', x, 0))
+          myObstacles.push(
+            new component(10, x - height - gap, 'green', x, height + gap)
+          )
+        }
+
+        for (i = 0; i < myObstacles.length; i += 1) {
+          myObstacles[i].x += -1
+          myObstacles[i].update()
+        }
+        myScore.text = 'SCORE: ' + myGameArea.frameNo
+        myScore.update()
+        myGamePiece.newPos()
+        myGamePiece.update()
+        // myBackground.speedX = -1
+        // myBackground.newPos()
+        // myBackground.update()
+
+        myGamePiece.speedX = 0
+        myGamePiece.speedY = 0
+
+        if (myGameArea.keys && myGameArea.keys[37]) {
+          myGamePiece.speedX = -1
+          this.gravitySpeed = 0
+        }
+        if (myGameArea.keys && myGameArea.keys[39]) {
+          myGamePiece.speedX = 1
+        }
+        if (myGameArea.keys && myGameArea.keys[38]) {
+          myGamePiece.speedY = -1
+        }
+        if (myGameArea.keys && myGameArea.keys[40]) {
+          myGamePiece.speedY = 1
+        }
+      }
+
+      function stopMove() {
+        myGamePiece.image.src = 'smiley.gif'
+        myGamePiece.speedX = 0
+        myGamePiece.speedY = 0
+      }
+
+      startGame()
+    </script>
+  </body>
+</html>
